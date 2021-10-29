@@ -31,6 +31,7 @@ def get_usb_products(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true", help="enable debug logging")
+    parser.add_argument("--dry-run", action="store_true", help="detect and log labels but don't update")
     parser.add_argument("--kubeconfig", default=None, help="kubernetes config")
     parser.add_argument("--kubenode", default=getenv("KUBENODE", ""), help="kubernetes node name")
     parser.add_argument("--root", default=Path("/"), type=Path, help="host filesystem root")
@@ -48,11 +49,6 @@ def main():
         kubernetes.config.load_kube_config(args.kubeconfig)
 
     api = kubernetes.client.CoreV1Api()
-
-    # - name: KUBE_NODE_NAME
-    #   valueFrom:
-    #     fieldRef:
-    #       fieldPath: spec.nodeName
 
     device_list = [
         "bme280",
@@ -95,8 +91,11 @@ def main():
         }
 
         # update labels host node
-        logging.info("updating labels")
-        api.patch_node(args.kubenode, patch)
+        if args.dry_run:
+            logging.info("dry run - will not update labels")
+        else:
+            logging.info("updating labels")
+            api.patch_node(args.kubenode, patch)
 
         time.sleep(60)
 
