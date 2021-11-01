@@ -59,30 +59,35 @@ def main():
     ]
 
     while True:
-        labels = {device: None for device in device_list}
+        logging.info("scanning for devices")
+
+        resources = {device: None for device in device_list}
         
         iio_names = get_iio_names(args)
         usb_products = get_usb_products(args)
         
         if "bme280" in iio_names:
-            labels["bme280"] = "true"
+            resources["bme280"] = "true"
         
         if "bme680" in iio_names:
-            labels["bme680"] = "true"
+            resources["bme680"] = "true"
         
         if Path(args.root, "dev/gps").exists():
-            labels["gps"] = "true"
+            resources["gps"] = "true"
 
         if "usb audio device" in usb_products:
-            labels["microphone"] = "true"
+            resources["microphone"] = "true"
 
         # NOTE the raingauge uses a generic usb serial connector, so it's hard to tell that it's 
         # specifically the raingauge. we just assume that it's the only one on the rpi
         if "rpi" in args.kubenode and Path(args.root, "dev/ttyUSB0").exists():
-            labels["raingauge"] = "true"
+            resources["raingauge"] = "true"
 
-        detected = [name for name, label in labels.items() if label is not None]
+        detected = [name for name, label in resources.items() if label is not None]
         logging.info("detected: %s", ", ".join(detected))
+
+        # prefix all resources detect with resource.
+        labels = {f"resource.{k}": v for k, v in resources.items()}
 
         patch = {
             "metadata": {
