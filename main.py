@@ -51,6 +51,7 @@ def main():
     api = kubernetes.client.CoreV1Api()
 
     device_list = [
+        "gpu",
         "bme280",
         "bme680",
         "gps",
@@ -65,7 +66,10 @@ def main():
         
         iio_names = get_iio_names(args)
         usb_products = get_usb_products(args)
-        
+
+        if "nxcore" in args.kubenode or "nxagent" in args.kubenode:
+            resources["gpu"] = "true"
+
         if "bme280" in iio_names:
             resources["bme280"] = "true"
         
