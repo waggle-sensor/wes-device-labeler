@@ -67,8 +67,10 @@ def main():
         iio_names = get_iio_names(args)
         usb_products = get_usb_products(args)
 
-        if "nxcore" in args.kubenode or "nxagent" in args.kubenode:
-            resources["gpu"] = "true"
+        # tag gpu nodes
+        for node in ["nxcore", "nxagent", "blade"]:
+            if node in args.kubenode:
+                resources["gpu"] = "true"
 
         if "bme280" in iio_names:
             resources["bme280"] = "true"
