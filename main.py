@@ -72,7 +72,7 @@ def main():
         usb_products = get_usb_products(args)
 
         # tag gpu nodes
-        for node in ["nxcore", "nxagent", "blade"]:
+        for node in ["nxcore", "nxagent", "sb-core"]:
             if node in args.kubenode:
                 resources["gpu"] = "true"
 
