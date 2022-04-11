@@ -1,9 +1,10 @@
 import argparse
-from os import getenv
-import kubernetes
 import logging
 import time
+from os import getenv
 from pathlib import Path
+
+import kubernetes
 
 
 def get_iio_names(args):
@@ -31,7 +32,9 @@ def get_usb_products(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true", help="enable debug logging")
-    parser.add_argument("--dry-run", action="store_true", help="detect and log labels but don't update")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="detect and log labels but don't update"
+    )
     parser.add_argument("--kubeconfig", default=None, help="kubernetes config")
     parser.add_argument("--kubenode", default=getenv("KUBENODE", ""), help="kubernetes node name")
     parser.add_argument("--root", default=Path("/"), type=Path, help="host filesystem root")
@@ -40,7 +43,8 @@ def main():
     logging.basicConfig(
         level=logging.DEBUG if args.debug else logging.INFO,
         format="%(asctime)s %(message)s",
-        datefmt="%Y/%m/%d %H:%M:%S")
+        datefmt="%Y/%m/%d %H:%M:%S",
+    )
 
     # load incluster service account config
     if args.kubeconfig is None:
@@ -63,7 +67,7 @@ def main():
         logging.info("scanning for devices")
 
         resources = {device: None for device in device_list}
-        
+
         iio_names = get_iio_names(args)
         usb_products = get_usb_products(args)
 
@@ -74,17 +78,17 @@ def main():
 
         if "bme280" in iio_names:
             resources["bme280"] = "true"
-        
+
         if "bme680" in iio_names:
             resources["bme680"] = "true"
-        
+
         if Path(args.root, "dev/gps").exists():
             resources["gps"] = "true"
 
         if "usb audio device" in usb_products:
             resources["microphone"] = "true"
 
-        # NOTE the raingauge uses a generic usb serial connector, so it's hard to tell that it's 
+        # NOTE the raingauge uses a generic usb serial connector, so it's hard to tell that it's
         # specifically the raingauge. we just assume that it's the only one on the rpi
         if "rpi" in args.kubenode and Path(args.root, "dev/ttyUSB0").exists():
             resources["raingauge"] = "true"
@@ -95,11 +99,7 @@ def main():
         # prefix all resources detect with resource.
         labels = {f"resource.{k}": v for k, v in resources.items()}
 
-        patch = {
-            "metadata": {
-                "labels": labels
-            }
-        }
+        patch = {"metadata": {"labels": labels}}
 
         # update labels host node
         if args.dry_run:
@@ -109,6 +109,7 @@ def main():
             api.patch_node(args.kubenode, patch)
 
         time.sleep(60)
+
 
 if __name__ == "__main__":
     try:
