@@ -3,6 +3,7 @@ import logging
 import time
 from os import getenv
 from pathlib import Path
+import subprocess
 
 import kubernetes
 
@@ -15,17 +16,6 @@ def get_iio_names(args):
         except Exception:
             continue
         items.append(name)
-    return items
-
-
-def get_usb_products(args):
-    items = []
-    for p in Path(args.root, "sys/bus/usb/devices").glob("*/product"):
-        try:
-            product = p.read_text().strip().lower()
-        except Exception:
-            continue
-        items.append(product)
     return items
 
 
@@ -69,7 +59,6 @@ def main():
         resources = {device: None for device in device_list}
 
         iio_names = get_iio_names(args)
-        usb_products = get_usb_products(args)
 
         # tag gpu nodes
         for node in ["nxcore", "nxagent", "sb-core"]:
@@ -85,7 +74,9 @@ def main():
         if Path(args.root, "dev/gps").exists():
             resources["gps"] = "true"
 
-        if "usb audio device" in usb_products:
+        lsusb_output = subprocess.check_output(["lsusb", "-v"]).decode()
+
+        if "Microphone" in lsusb_output:
             resources["microphone"] = "true"
 
         # NOTE the raingauge uses a generic usb serial connector, so it's hard to tell that it's
