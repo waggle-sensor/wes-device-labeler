@@ -1,9 +1,9 @@
 import argparse
 import logging
+import subprocess
 import time
 from os import getenv
 from pathlib import Path
-import subprocess
 
 import kubernetes
 
@@ -51,6 +51,7 @@ def main():
         "gps",
         "microphone",
         "raingauge",
+        "airquality",
     ]
 
     while True:
@@ -73,6 +74,9 @@ def main():
 
         if Path(args.root, "dev/gps").exists():
             resources["gps"] = "true"
+
+        if Path(args.root, "dev/airquality").exists():
+            resources["airquality"] = "true"
 
         lsusb_output = subprocess.check_output(["lsusb", "-v"]).decode()
 
