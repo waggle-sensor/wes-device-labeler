@@ -1,4 +1,5 @@
 import argparse
+import json
 import logging
 import subprocess
 import time
@@ -8,15 +9,43 @@ from pathlib import Path
 import kubernetes
 
 
-def get_iio_names(args):
-    items = []
-    for p in Path(args.root, "sys/bus/iio/devices").glob("*/name"):
-        try:
-            name = p.read_text().strip().lower()
-        except Exception:
-            continue
-        items.append(name)
-    return items
+class HardwareDetector:
+    def __init__(self, root):
+        self.root = root
+        self.update()
+
+    def update(self):
+        self.iio_names = self.__get_iio_names()
+        self.lsusb_output = subprocess.check_output(["lsusb", "-v"]).decode()
+
+    def resource_check_bme280(self):
+        return "bme280" in self.iio_names
+
+    def resource_check_bme680(self):
+        return "bme680" in self.iio_names
+
+    def resource_check_gps(self):
+        return Path(self.root, "dev/gps").exists()
+
+    def resource_check_airquality(self):
+        return Path(self.root, "dev/airquality").exists()
+
+    def resource_check_microphone(self):
+        return "Microphone" in self.lsusb_output
+
+    def resource_check_rainguage(self):
+        # raingauge uses a generic usb serial connector, for now assume it enumerates on USB0
+        return Path(self.root, "dev/ttyUSB0").exists()
+
+    def __get_iio_names(self):
+        items = []
+        for p in Path(self.root, "sys/bus/iio/devices").glob("*/name"):
+            try:
+                name = p.read_text().strip().lower()
+            except Exception:
+                continue
+            items.append(name)
+        return items
 
 
 def main():
@@ -28,6 +57,12 @@ def main():
     parser.add_argument("--kubeconfig", default=None, help="kubernetes config")
     parser.add_argument("--kubenode", default=getenv("KUBENODE", ""), help="kubernetes node name")
     parser.add_argument("--root", default=Path("/"), type=Path, help="host filesystem root")
+    parser.add_argument(
+        "--manifest",
+        default=Path("/etc/waggle/node-manifest-v2.json"),
+        type=Path,
+        help="path to node manifest file",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -44,64 +79,65 @@ def main():
 
     api = kubernetes.client.CoreV1Api()
 
-    device_list = [
-        "gpu",
-        "bme280",
-        "bme680",
-        "gps",
-        "microphone",
-        "raingauge",
-        "airquality",
-    ]
-
     while True:
         logging.info("scanning for devices")
 
-        resources = {device: None for device in device_list}
+        # get list of current resources on node and assume not present (will be set below)
+        #  this is ensure that if an item (sensor or capability) currently on the node labels disappears, it is removed on the node update below
+        node_labels = api.read_node(args.kubenode).metadata.labels
+        resources = {i.split(".")[1]: None for i in node_labels if i.split(".")[0] == "resource"}
 
-        iio_names = get_iio_names(args)
+        # load the node manifest
+        with open(args.manifest) as f:
+            manifest = json.load(f)
 
-        # tag gpu nodes
-        for node in ["nxcore", "nxagent", "sb-core"]:
-            if node in args.kubenode:
-                resources["gpu"] = "true"
+        # get the manifest compute dict for this node
+        for compute in manifest["computes"]:
+            if compute["serial_no"].lower() in args.kubenode.lower():
+                manifest_compute = compute
+                break
 
-        if "bme280" in iio_names:
-            resources["bme280"] = "true"
+        # get list of sensors associated to this node
+        node_sensors = [s for s in manifest["sensors"] if s["scope"] == manifest_compute["name"]]
 
-        if "bme680" in iio_names:
-            resources["bme680"] = "true"
+        # add the node capabilities
+        logging.info("capabilities: %s", manifest_compute["hardware"]["capabilities"])
+        for capability in manifest_compute["hardware"]["capabilities"]:
+            resources[capability] = "true"
 
-        if Path(args.root, "dev/gps").exists():
-            resources["gps"] = "true"
+        # check if the hardware exists
+        hwDetector = HardwareDetector(root=args.root)
+        for sensor in node_sensors:
+            sensor_hw = sensor["hardware"]["hardware"]
+            logging.info("checking manifest listed sensor: %s", sensor_hw)
+            resource_check_func = None
+            try:
+                resource_check_func = getattr(hwDetector, f"resource_check_{sensor_hw}")
+                if resource_check_func():
+                    resources[sensor_hw] = "true"
+            except:
+                logging.exception(
+                    "Hardware detection function for [%s] not found, unable to test for hardware.",
+                    sensor_hw,
+                )
 
-        if Path(args.root, "dev/airquality").exists():
-            resources["airquality"] = "true"
-
-        lsusb_output = subprocess.check_output(["lsusb", "-v"]).decode()
-
-        if "Microphone" in lsusb_output:
-            resources["microphone"] = "true"
-
-        # NOTE the raingauge uses a generic usb serial connector, so it's hard to tell that it's
-        # specifically the raingauge. we just assume that it's the only one on the rpi
-        if "rpi" in args.kubenode and Path(args.root, "dev/ttyUSB0").exists():
-            resources["raingauge"] = "true"
-
+        # log and update the kubernetes node labels
         detected = [name for name, label in resources.items() if label is not None]
-        logging.info("detected: %s", ", ".join(detected))
+        logging.info("applying resources: %s", ", ".join(detected))
 
         # prefix all resources detect with resource.
         labels = {f"resource.{k}": v for k, v in resources.items()}
 
-        patch = {"metadata": {"labels": labels}}
+        # add optional zone label
+        labels["zone"] = manifest_compute["zone"].lower() if manifest_compute["zone"] else None
+        logging.info("applying zone: %s", labels["zone"])
 
         # update labels host node
         if args.dry_run:
             logging.info("dry run - will not update labels")
         else:
             logging.info("updating labels")
-            api.patch_node(args.kubenode, patch)
+            api.patch_node(args.kubenode, {"metadata": {"labels": labels}})
 
         time.sleep(60)
 
