@@ -1,0 +1,343 @@
+{
+    "vsn": "W030",
+    "name": "000048B02D0766BE",
+    "gps_lat": null,
+    "gps_lon": null,
+    "tags": [],
+    "computes": [
+        {
+            "hardware": {
+                "hardware": "compute-xaviernx",
+                "hw_model": "xavierNX",
+                "hw_version": "NGX003",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "6000",
+                "cpu_ram": "8092",
+                "gpu_ram": "8092",
+                "shared_ram": true,
+                "capabilities": [
+                    "gpu",
+                    "arm64",
+                    "cuda102"
+                ]
+            },
+            "name": "nxcore",
+            "serial_no": "000000000001",
+            "zone": "core"
+        },
+        {
+            "hardware": {
+                "hardware": "compute-xaviernx-poe",
+                "hw_model": "xavierNX",
+                "hw_version": "NGX002",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "6000",
+                "cpu_ram": "8092",
+                "gpu_ram": "8092",
+                "shared_ram": true,
+                "capabilities": [
+                    "gpu",
+                    "arm64",
+                    "cuda102",
+                    "poe"
+                ]
+            },
+            "name": "nxagent",
+            "serial_no": "000000000002",
+            "zone": ""
+        },
+        {
+            "hardware": {
+                "hardware": "compute-rpi-4gb",
+                "hw_model": "RPI4B",
+                "hw_version": "rpi4b-4g",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "4000",
+                "cpu_ram": "4096",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": [
+                    "arm64",
+                    "poe"
+                ]
+            },
+            "name": "rpi-shield",
+            "serial_no": "000000000003",
+            "zone": "shield"
+        },
+        {
+            "hardware": {
+                "hardware": "compute-rpi-4gb",
+                "hw_model": "RPI4B",
+                "hw_version": "rpi4b-4g",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "4000",
+                "cpu_ram": "4096",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": [
+                    "arm64",
+                    "poe"
+                ]
+            },
+            "name": "rpi-enclosure",
+            "serial_no": "000000000004",
+            "zone": "enclosure"
+        }
+    ],
+    "sensors": [
+        {
+            "hardware": {
+                "hardware": "fe-8010",
+                "hw_model": "XNF-8010RV",
+                "hw_version": "",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "top-camera",
+            "scope": "global",
+            "labels": [
+                "top"
+            ]
+        },
+        {
+            "hardware": {
+                "hardware": "ptz-8081",
+                "hw_model": "XNV-8081Z",
+                "hw_version": "",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "bottom-camera",
+            "scope": "global",
+            "labels": [
+                "bottom"
+            ]
+        },
+        {
+            "hardware": {
+                "hardware": "bme280",
+                "hw_model": "BME280",
+                "hw_version": "",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "bme280",
+            "scope": "nxcore",
+            "labels": []
+        },
+        {
+            "hardware": {
+                "hardware": "gps",
+                "hw_model": "VK-162",
+                "hw_version": "",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "gps",
+            "scope": "nxcore",
+            "labels": []
+        },
+        {
+            "hardware": {
+                "hardware": "bme680",
+                "hw_model": "BME680",
+                "hw_version": "",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "bme680",
+            "scope": "rpi-shield",
+            "labels": []
+        },
+        {
+            "hardware": {
+                "hardware": "bme680",
+                "hw_model": "BME680",
+                "hw_version": "",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "bme680",
+            "scope": "rpi-enclosure",
+            "labels": []
+        },
+        {
+            "hardware": {
+                "hardware": "microphone",
+                "hw_model": "ML1-WS IP54",
+                "hw_version": "",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "microphone",
+            "scope": "rpi-shield",
+            "labels": []
+        },
+        {
+            "hardware": {
+                "hardware": "rainguage",
+                "hw_model": "RG-15",
+                "hw_version": "",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "rainguage",
+            "scope": "rpi-shield",
+            "labels": []
+        },
+        {
+            "hardware": {
+                "hardware": "airquality",
+                "hw_model": "Metone ES-642",
+                "hw_version": "",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "airquality",
+            "scope": "nxcore",
+            "labels": []
+        }
+    ],
+    "resources": [
+        {
+            "hardware": {
+                "hardware": "psu-B0BD",
+                "hw_model": "RCB600",
+                "hw_version": "B0BD",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "psu"
+        },
+        {
+            "hardware": {
+                "hardware": "resource-switch",
+                "hw_model": "ES-8-150W",
+                "hw_version": "",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "switch"
+        },
+        {
+            "hardware": {
+                "hardware": "resource-usbhub-10port",
+                "hw_model": "HB30A10AME",
+                "hw_version": "",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "usb-10-port"
+        },
+        {
+            "hardware": {
+                "hardware": "resource-usbhub-2port",
+                "hw_model": "B07TPS44SL",
+                "hw_version": "",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "usb-2-port"
+        },
+        {
+            "hardware": {
+                "hardware": "resource-wagman",
+                "hw_model": "wagmanv5",
+                "hw_version": "v5.0",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "wagman"
+        },
+        {
+            "hardware": {
+                "hardware": "resource-wifi-1",
+                "hw_model": "AC650",
+                "hw_version": "v2",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "",
+                "cpu_ram": "",
+                "gpu_ram": "",
+                "shared_ram": false,
+                "capabilities": []
+            },
+            "name": "wifi"
+        }
+    ]
+}

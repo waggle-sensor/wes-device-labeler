@@ -1,0 +1,32 @@
+{
+    "vsn": "V002",
+    "name": "000048B02D0766BE",
+    "gps_lat": null,
+    "gps_lon": null,
+    "tags": [],
+    "computes": [
+        {
+            "hardware": {
+                "hardware": "compute-dell-xr2",
+                "hw_model": "PowerEdge XR2",
+                "hw_version": "",
+                "sw_version": "",
+                "datasheet": "<url>",
+                "cpu": "16000",
+                "cpu_ram": "32768",
+                "gpu_ram": "16384",
+                "shared_ram": false,
+                "capabilities": [
+                    "gpu",
+                    "amd64",
+                    "cuda110"
+                ]
+            },
+            "name": "sbcore",
+            "serial_no": "0000000000000005",
+            "zone": "core"
+        }
+    ],
+    "sensors": [],
+    "resources": []
+}

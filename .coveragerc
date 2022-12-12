@@ -1,0 +1,9 @@
+[run]
+omit=test.py
+
+[report]
+show_missing=True
+fail_under=85
+precision=1
+exclude_lines =
+    pragma: no cover
