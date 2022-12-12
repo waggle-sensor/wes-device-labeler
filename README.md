@@ -11,3 +11,7 @@ The device labeler reads the [Waggle node's manifest](https://auth.sagecontinuum
 3. the compute unit's `zone` (ex. `shield`) [added as `zone.*`]
 
 > The list of connected sensors are verified to ensure the physical hardware sensor is available. If the hardware is not found the `resource.*` label for that sensor is **NOT** applied.
+
+## Unit Testing
+
+The `test.py` file contains [mocked](https://docs.python.org/3.8/library/unittest.mock.html) functions for the [Kubernetes](https://pypi.org/project/kubernetes/) function calls and simulations of the physical hardware tests. **When new hardware detection is added, the simulation for that hardware detection will need to be added.**

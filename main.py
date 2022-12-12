@@ -63,6 +63,7 @@ def main():
         type=Path,
         help="path to node manifest file",
     )
+    parser.add_argument("--oneshot", action="store_true", help="enable to only test once")
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -92,10 +93,14 @@ def main():
             manifest = json.load(f)
 
         # get the manifest compute dict for this node
+        manifest_compute = None
         for compute in manifest["computes"]:
             if compute["serial_no"].lower() in args.kubenode.lower():
                 manifest_compute = compute
                 break
+
+        if not manifest_compute:
+            raise Exception("Unable to find compute `%s` in manifest", args.kubenode)
 
         # get list of sensors associated to this node
         node_sensors = [s for s in manifest["sensors"] if s["scope"] == manifest_compute["name"]]
@@ -123,7 +128,7 @@ def main():
 
         # log and update the kubernetes node labels
         detected = [name for name, label in resources.items() if label is not None]
-        logging.info("applying resources: %s", ", ".join(detected))
+        logging.info("applying resources: %s", ", ".join(sorted(detected)))
 
         # prefix all resources detect with resource.
         labels = {f"resource.{k}": v for k, v in resources.items()}
@@ -139,10 +144,12 @@ def main():
             logging.info("updating labels")
             api.patch_node(args.kubenode, {"metadata": {"labels": labels}})
 
+        if args.oneshot:
+            break
         time.sleep(60)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     try:
         main()
     except KeyboardInterrupt:
