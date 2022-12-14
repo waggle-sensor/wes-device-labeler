@@ -33,7 +33,7 @@ class HardwareDetector:
     def resource_check_microphone(self):
         return "Microphone" in self.lsusb_output
 
-    def resource_check_rainguage(self):
+    def resource_check_raingauge(self):
         # raingauge uses a generic usb serial connector, for now assume it enumerates on USB0
         return Path(self.root, "dev/ttyUSB0").exists()
 
