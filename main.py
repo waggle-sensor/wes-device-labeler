@@ -95,12 +95,13 @@ def main():
         # get the manifest compute dict for this node
         manifest_compute = None
         for compute in manifest["computes"]:
-            if compute["serial_no"].lower() in args.kubenode.lower():
+            # strip the kube node to the 12 character mac address (0000e45f012a1f42.ws-rpi -> e45f012a1f42)
+            if compute["serial_no"].lower() == args.kubenode.lower().split(".")[0][-12:]:
                 manifest_compute = compute
                 break
 
         if not manifest_compute:
-            raise Exception("Unable to find compute `%s` in manifest", args.kubenode)
+            raise Exception(f"Unable to find compute {args.kubenode} in manifest")
 
         # get list of sensors associated to this node
         node_sensors = [s for s in manifest["sensors"] if s["scope"] == manifest_compute["name"]]
