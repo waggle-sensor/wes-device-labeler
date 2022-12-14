@@ -106,7 +106,7 @@ class TestService(unittest.TestCase):
                 )
                 main()
         self.assertIn(
-            "INFO:root:applying resources: arm64, bme680, microphone, poe, rainguage", logs.output
+            "INFO:root:applying resources: arm64, bme680, microphone, poe, raingauge", logs.output
         )
         self.assertIn("INFO:root:applying zone: shield", logs.output)
 

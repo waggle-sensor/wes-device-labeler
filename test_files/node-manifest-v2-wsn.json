@@ -215,7 +215,7 @@
         },
         {
             "hardware": {
-                "hardware": "rainguage",
+                "hardware": "raingauge",
                 "hw_model": "RG-15",
                 "hw_version": "",
                 "sw_version": "",
@@ -226,7 +226,7 @@
                 "shared_ram": false,
                 "capabilities": []
             },
-            "name": "rainguage",
+            "name": "raingauge",
             "scope": "rpi-shield",
             "labels": []
         },
