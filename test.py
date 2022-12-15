@@ -169,7 +169,6 @@ class TestService(unittest.TestCase):
                     )
                     main()
 
-    # TODO: TEST FOR exception when there is no test for a piece of hardware
     def testMissingHardwareFunction(self, mock_k_lic, mock_k_lkc, mock_k_core, mock_subprocess):
         with patch("argparse.ArgumentParser.parse_args") as mock:
             with self.assertLogs() as logs:

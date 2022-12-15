@@ -64,6 +64,7 @@ def main():
         help="path to node manifest file",
     )
     parser.add_argument("--oneshot", action="store_true", help="enable to only test once")
+    parser.add_argument("--delay", default=60, type=int, help="time (s) between detection loops")
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -80,12 +81,27 @@ def main():
 
     api = kubernetes.client.CoreV1Api()
 
-    while True:
+    if args.oneshot:
+        args.delay = 0
+
+    run_once = False
+    while not args.oneshot or (args.oneshot and not run_once):
+        logging.info("sleep %ds...", args.delay)
+        time.sleep(args.delay)
         logging.info("scanning for devices")
+        run_once = True
 
         # get list of current resources on node and assume not present (will be set below)
         #  this is ensure that if an item (sensor or capability) currently on the node labels disappears, it is removed on the node update below
-        node_labels = api.read_node(args.kubenode).metadata.labels
+        try:
+            node_labels = api.read_node(args.kubenode).metadata.labels
+        except:
+            # log and try again later
+            logging.exception(
+                "Exception attempting to read kubernetes node [%s] info, try again later.",
+                args.kubenode,
+            )
+            continue
         resources = {i.split(".")[1]: None for i in node_labels if i.split(".")[0] == "resource"}
 
         # load the node manifest
@@ -122,6 +138,7 @@ def main():
                 if resource_check_func():
                     resources[sensor_hw] = "true"
             except:
+                # log and continue to process other resources
                 logging.exception(
                     "Hardware detection function for [%s] not found, unable to test for hardware.",
                     sensor_hw,
@@ -143,11 +160,15 @@ def main():
             logging.info("dry run - will not update labels")
         else:
             logging.info("updating labels")
-            api.patch_node(args.kubenode, {"metadata": {"labels": labels}})
-
-        if args.oneshot:
-            break
-        time.sleep(60)
+            try:
+                api.patch_node(args.kubenode, {"metadata": {"labels": labels}})
+            except:
+                # log and try again later
+                logging.exception(
+                    "Exception attempting to apply labels to kubernetes node [%s], try again later.",
+                    args.kubenode,
+                )
+                continue
 
 
 if __name__ == "__main__":  # pragma: no cover
