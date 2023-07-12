@@ -246,6 +246,23 @@
             "name": "airquality",
             "scope": "nxcore",
             "labels": []
+        },
+        {
+            "name": "lorawan",
+            "scope": "rpi-shield",
+            "labels": [],
+            "serial_no": "",
+            "uri": "",
+            "hardware": {
+                "hardware": "lorawan",
+                "hw_model": "LoRaWAN Gateway",
+                "hw_version": "",
+                "sw_version": "",
+                "manufacturer": "RAK",
+                "datasheet": "",
+                "capabilities": [],
+                "description": "RAK RPi LoRaWAN hat."
+            }
         }
     ],
     "resources": [

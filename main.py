@@ -18,6 +18,9 @@ class HardwareDetector:
         self.iio_names = self.__get_iio_names()
         self.lsusb_output = subprocess.check_output(["lsusb", "-v"]).decode()
 
+    # NOTE(sean) Joe used getattr in the main function to dyamically find the various
+    # resource_check_xyz functions below.
+
     def resource_check_bme280(self):
         return "bme280" in self.iio_names
 
@@ -37,6 +40,11 @@ class HardwareDetector:
         # raingauge uses a generic usb serial connector, for now assume it enumerates on USB0
         return Path(self.root, "dev/ttyUSB0").exists()
 
+    def resource_check_lorawan(self):
+        # TODO Decide on an actual hardware check. For now, this basically applies the label
+        # if it's in the manifest without any further checks.
+        return True
+
     def __get_iio_names(self):
         items = []
         for p in Path(self.root, "sys/bus/iio/devices").glob("*/name"):
@@ -55,16 +63,24 @@ def main():
         "--dry-run", action="store_true", help="detect and log labels but don't update"
     )
     parser.add_argument("--kubeconfig", default=None, help="kubernetes config")
-    parser.add_argument("--kubenode", default=getenv("KUBENODE", ""), help="kubernetes node name")
-    parser.add_argument("--root", default=Path("/"), type=Path, help="host filesystem root")
+    parser.add_argument(
+        "--kubenode", default=getenv("KUBENODE", ""), help="kubernetes node name"
+    )
+    parser.add_argument(
+        "--root", default=Path("/"), type=Path, help="host filesystem root"
+    )
     parser.add_argument(
         "--manifest",
         default=Path("/etc/waggle/node-manifest-v2.json"),
         type=Path,
         help="path to node manifest file",
     )
-    parser.add_argument("--oneshot", action="store_true", help="enable to only test once")
-    parser.add_argument("--delay", default=60, type=int, help="time (s) between detection loops")
+    parser.add_argument(
+        "--oneshot", action="store_true", help="enable to only test once"
+    )
+    parser.add_argument(
+        "--delay", default=60, type=int, help="time (s) between detection loops"
+    )
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -102,7 +118,9 @@ def main():
                 args.kubenode,
             )
             continue
-        resources = {i.split(".")[1]: None for i in node_labels if i.split(".")[0] == "resource"}
+        resources = {
+            i.split(".")[1]: None for i in node_labels if i.split(".")[0] == "resource"
+        }
 
         # load the node manifest
         with open(args.manifest) as f:
@@ -112,7 +130,10 @@ def main():
         manifest_compute = None
         for compute in manifest["computes"]:
             # strip the kube node to the 12 character mac address (0000e45f012a1f42.ws-rpi -> e45f012a1f42)
-            if compute["serial_no"].lower() == args.kubenode.lower().split(".")[0][-12:]:
+            if (
+                compute["serial_no"].lower()
+                == args.kubenode.lower().split(".")[0][-12:]
+            ):
                 manifest_compute = compute
                 break
 
@@ -120,7 +141,9 @@ def main():
             raise Exception(f"Unable to find compute {args.kubenode} in manifest")
 
         # get list of sensors associated to this node
-        node_sensors = [s for s in manifest["sensors"] if s["scope"] == manifest_compute["name"]]
+        node_sensors = [
+            s for s in manifest["sensors"] if s["scope"] == manifest_compute["name"]
+        ]
 
         # add the node capabilities
         logging.info("capabilities: %s", manifest_compute["hardware"]["capabilities"])
@@ -132,17 +155,19 @@ def main():
         for sensor in node_sensors:
             sensor_hw = sensor["hardware"]["hardware"]
             logging.info("checking manifest listed sensor: %s", sensor_hw)
-            resource_check_func = None
-            try:
-                resource_check_func = getattr(hwDetector, f"resource_check_{sensor_hw}")
-                if resource_check_func():
-                    resources[sensor_hw] = "true"
-            except:
-                # log and continue to process other resources
-                logging.exception(
+            resource_check_func = getattr(
+                hwDetector, f"resource_check_{sensor_hw}", None
+            )
+
+            if resource_check_func is None:
+                logging.error(
                     "Hardware detection function for [%s] not found, unable to test for hardware.",
                     sensor_hw,
                 )
+                continue
+
+            if resource_check_func():
+                resources[sensor_hw] = "true"
 
         # log and update the kubernetes node labels
         detected = [name for name, label in resources.items() if label is not None]
@@ -152,7 +177,9 @@ def main():
         labels = {f"resource.{k}": v for k, v in resources.items()}
 
         # add optional zone label
-        labels["zone"] = manifest_compute["zone"].lower() if manifest_compute["zone"] else None
+        labels["zone"] = (
+            manifest_compute["zone"].lower() if manifest_compute["zone"] else None
+        )
         logging.info("applying zone: %s", labels["zone"])
 
         # update labels host node

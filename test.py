@@ -28,7 +28,9 @@ NODE_MANIFEST_HW_DETECT_FAIL = "test_files/node-manifest-v2-lidar-fail.json"
         read_node=Mock(return_value=Mock(metadata=Mock(labels={"resource.bogus=True"})))
     ),
 )
-@patch("subprocess.check_output", return_value=Mock(decode=Mock(return_value="Microphone")))
+@patch(
+    "subprocess.check_output", return_value=Mock(decode=Mock(return_value="Microphone"))
+)
 class TestService(unittest.TestCase):
     def setUp(self):
         self.root_tmpdr = tempfile.TemporaryDirectory()
@@ -42,7 +44,6 @@ class TestService(unittest.TestCase):
 
     def testNXCore(self, mock_k_lic, mock_k_lkc, mock_k_core, mock_subprocess):
         with patch("argparse.ArgumentParser.parse_args") as mock:
-
             # make the fake device and system files
             Path(self.root, "dev/gps").touch()
             Path(self.root, "dev/airquality").touch()
@@ -68,7 +69,6 @@ class TestService(unittest.TestCase):
 
     def testNXAgent(self, mock_k_lic, mock_k_lkc, mock_k_core, mock_subprocess):
         with patch("argparse.ArgumentParser.parse_args") as mock:
-
             # no device/system files
 
             with self.assertLogs() as logs:
@@ -82,13 +82,14 @@ class TestService(unittest.TestCase):
                     oneshot=True,
                 )
                 main()
-        self.assertIn("INFO:root:applying resources: arm64, cuda102, gpu, poe", logs.output)
+        self.assertIn(
+            "INFO:root:applying resources: arm64, cuda102, gpu, poe", logs.output
+        )
         # Test for a compute unit withOUT a 'zone' set
         self.assertIn("INFO:root:applying zone: None", logs.output)
 
     def testNXRPiShield(self, mock_k_lic, mock_k_lkc, mock_k_core, mock_subprocess):
         with patch("argparse.ArgumentParser.parse_args") as mock:
-
             # make the fake device and system files
             Path(self.root, "dev/ttyUSB0").touch()
             with open(Path(self.root, "sys/bus/iio/devices/iio2/name"), "w") as f:
@@ -106,13 +107,13 @@ class TestService(unittest.TestCase):
                 )
                 main()
         self.assertIn(
-            "INFO:root:applying resources: arm64, bme680, microphone, poe, raingauge", logs.output
+            "INFO:root:applying resources: arm64, bme680, lorawan, microphone, poe, raingauge",
+            logs.output,
         )
         self.assertIn("INFO:root:applying zone: shield", logs.output)
 
     def testNXRPiEnclosure(self, mock_k_lic, mock_k_lkc, mock_k_core, mock_subprocess):
         with patch("argparse.ArgumentParser.parse_args") as mock:
-
             # make the fake device and system files
             with open(Path(self.root, "sys/bus/iio/devices/iio2/name"), "w") as f:
                 f.write("bme680")
@@ -133,7 +134,6 @@ class TestService(unittest.TestCase):
 
     def testBladeCore(self, mock_k_lic, mock_k_lkc, mock_k_core, mock_subprocess):
         with patch("argparse.ArgumentParser.parse_args") as mock:
-
             # make the fake device and system files
             Path(self.root, "dev/gps").touch()
             Path(self.root, "dev/airquality").touch()
@@ -169,7 +169,9 @@ class TestService(unittest.TestCase):
                     )
                     main()
 
-    def testMissingHardwareFunction(self, mock_k_lic, mock_k_lkc, mock_k_core, mock_subprocess):
+    def testMissingHardwareFunction(
+        self, mock_k_lic, mock_k_lkc, mock_k_core, mock_subprocess
+    ):
         with patch("argparse.ArgumentParser.parse_args") as mock:
             with self.assertLogs() as logs:
                 mock.return_value = argparse.Namespace(
@@ -183,7 +185,9 @@ class TestService(unittest.TestCase):
                 )
                 main()
         combined_out = "".join(logs.output)
-        self.assertIn("ERROR:root:Hardware detection function for [lidar] not found", combined_out)
+        self.assertIn(
+            "ERROR:root:Hardware detection function for [lidar] not found", combined_out
+        )
 
 
 if __name__ == "__main__":
