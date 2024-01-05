@@ -47,6 +47,9 @@ class TestService(unittest.TestCase):
             # make the fake device and system files
             Path(self.root, "dev/gps").touch()
             Path(self.root, "dev/airquality").touch()
+            Path(self.root, "dev/waggle-metone-es-642").touch()
+            Path(self.root, "dev/waggle-vaisala-wxt-535").touch()
+            Path(self.root, "dev/waggle-Invalid_device").touch()
             with open(Path(self.root, "sys/bus/iio/devices/iio1/name"), "w") as f:
                 f.write("bme280")
 
@@ -61,11 +64,15 @@ class TestService(unittest.TestCase):
                     oneshot=True,
                 )
                 main()
+        output = "\n".join(logs.output)
         self.assertIn(
             "INFO:root:applying resources: airquality, arm64, bme280, cuda102, gps, gpu",
-            logs.output,
+            output,
         )
-        self.assertIn("INFO:root:applying zone: core", logs.output)
+        self.assertIn("metone-es-642", output)
+        self.assertIn("vaisala-wxt-535", output)
+        self.assertIn("invalid device name Invalid_device - ignoring", output)
+        self.assertIn("INFO:root:applying zone: core", output)
 
     def testNXAgent(self, mock_k_lic, mock_k_lkc, mock_k_core, mock_subprocess):
         with patch("argparse.ArgumentParser.parse_args") as mock:

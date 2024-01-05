@@ -5,6 +5,7 @@ import subprocess
 import time
 from os import getenv
 from pathlib import Path
+import re
 
 import kubernetes
 
@@ -54,6 +55,13 @@ class HardwareDetector:
                 continue
             items.append(name)
         return items
+
+
+# This was added in Python 3.9, but I'm just adding a stub here.
+def removeprefix(s, p):
+    if s.startswith(p):
+        return s[len(p) :]
+    return s
 
 
 def main():
@@ -168,6 +176,16 @@ def main():
 
             if resource_check_func():
                 resources[sensor_hw] = "true"
+
+        # NOTE(sean) For the upcoming udev based device names, I'm am just check what's on node and not
+        # cross checking the manifest. I think this is a bit simpler and we will likely have the right
+        # config tracked by the time a udev rule is actually set.
+        for path in Path(args.root, "dev").glob("waggle-*"):
+            name = removeprefix(path.name, "waggle-")
+            if not re.fullmatch(r"[a-z0-9-]", name):
+                logging.warning("invalid device name %s - ignoring", name)
+                continue
+            resources[name] = "true"
 
         # log and update the kubernetes node labels
         detected = [name for name, label in resources.items() if label is not None]
