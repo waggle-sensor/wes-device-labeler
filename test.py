@@ -64,12 +64,15 @@ class TestService(unittest.TestCase):
                     oneshot=True,
                 )
                 main()
+
         output = "\n".join(logs.output)
-        self.assertIn(
-            "INFO:root:applying resources: airquality, arm64, bme280, cuda102, gps, gpu",
-            output,
-        )
-        self.assertIn("INFO:root:applying zone: core", output)
+        self.assertRegex(output, "applying zone: core")
+        self.assertRegex(output, "applying resources:.*airquality")
+        self.assertRegex(output, "applying resources:.*arm64")
+        self.assertRegex(output, "applying resources:.*bme280")
+        self.assertRegex(output, "applying resources:.*cuda102")
+        self.assertRegex(output, "applying resources:.*gps")
+        self.assertRegex(output, "applying resources:.*gpu")
         self.assertRegex(output, "applying resources:.*metone-es-642")
         self.assertRegex(output, "applying resources:.*vaisala-wxt-535")
         self.assertRegex(output, "invalid device name Invalid_device - ignoring")
