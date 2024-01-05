@@ -182,7 +182,7 @@ def main():
         # config tracked by the time a udev rule is actually set.
         for path in Path(args.root, "dev").glob("waggle-*"):
             name = removeprefix(path.name, "waggle-")
-            if not re.fullmatch(r"[a-z0-9-]", name):
+            if not re.fullmatch(r"[a-z0-9-]+", name):
                 logging.warning("invalid device name %s - ignoring", name)
                 continue
             resources[name] = "true"

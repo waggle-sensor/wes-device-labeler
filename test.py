@@ -69,10 +69,10 @@ class TestService(unittest.TestCase):
             "INFO:root:applying resources: airquality, arm64, bme280, cuda102, gps, gpu",
             output,
         )
-        self.assertIn("metone-es-642", output)
-        self.assertIn("vaisala-wxt-535", output)
-        self.assertIn("invalid device name Invalid_device - ignoring", output)
         self.assertIn("INFO:root:applying zone: core", output)
+        self.assertRegex(output, "applying resources:.*metone-es-642")
+        self.assertRegex(output, "applying resources:.*vaisala-wxt-535")
+        self.assertRegex(output, "invalid device name Invalid_device - ignoring")
 
     def testNXAgent(self, mock_k_lic, mock_k_lkc, mock_k_core, mock_subprocess):
         with patch("argparse.ArgumentParser.parse_args") as mock:
