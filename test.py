@@ -47,6 +47,9 @@ class TestService(unittest.TestCase):
             # make the fake device and system files
             Path(self.root, "dev/gps").touch()
             Path(self.root, "dev/airquality").touch()
+            Path(self.root, "dev/waggle-metone-es-642").touch()
+            Path(self.root, "dev/waggle-vaisala-wxt-535").touch()
+            Path(self.root, "dev/waggle-Invalid_device").touch()
             with open(Path(self.root, "sys/bus/iio/devices/iio1/name"), "w") as f:
                 f.write("bme280")
 
@@ -61,11 +64,20 @@ class TestService(unittest.TestCase):
                     oneshot=True,
                 )
                 main()
-        self.assertIn(
-            "INFO:root:applying resources: airquality, arm64, bme280, cuda102, gps, gpu",
-            logs.output,
-        )
-        self.assertIn("INFO:root:applying zone: core", logs.output)
+
+                # combine all log output into single string to make easier to test
+                output = "\n".join(logs.output)
+
+            self.assertRegex(output, "applying zone: core")
+            self.assertRegex(output, "applying resources:.*airquality")
+            self.assertRegex(output, "applying resources:.*arm64")
+            self.assertRegex(output, "applying resources:.*bme280")
+            self.assertRegex(output, "applying resources:.*cuda102")
+            self.assertRegex(output, "applying resources:.*gps")
+            self.assertRegex(output, "applying resources:.*gpu")
+            self.assertRegex(output, "applying resources:.*metone-es-642")
+            self.assertRegex(output, "applying resources:.*vaisala-wxt-535")
+            self.assertRegex(output, "invalid device name Invalid_device - ignoring")
 
     def testNXAgent(self, mock_k_lic, mock_k_lkc, mock_k_core, mock_subprocess):
         with patch("argparse.ArgumentParser.parse_args") as mock:
