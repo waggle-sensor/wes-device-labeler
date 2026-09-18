@@ -248,19 +248,21 @@
             "labels": []
         },
         {
-            "name": "lorawan",
+            "name": "lorawan gateway",
             "scope": "rpi-shield",
             "labels": [],
             "serial_no": "",
             "uri": "",
             "hardware": {
-                "hardware": "lorawan",
-                "hw_model": "LoRaWAN Gateway",
+                "hardware": "RPI lorawan gateway",
+                "hw_model": "rak2287",
                 "hw_version": "",
                 "sw_version": "",
-                "manufacturer": "RAK",
+                "manufacturer": "Rakwireless",
                 "datasheet": "",
-                "capabilities": [],
+                "capabilities": [
+                    "lorawan"
+                ],
                 "description": "RAK RPi LoRaWAN hat."
             }
         }

@@ -41,8 +41,10 @@ class HardwareDetector:
         # raingauge uses a generic usb serial connector, for now assume it enumerates on USB0
         return Path(self.root, "dev/ttyUSB0").exists()
 
-    def resource_check_lorawan(self):
-        # TODO Decide on an actual hardware check. For now, this basically applies the label
+    def resource_check_lorawan_gateway(self):
+        # LoRaWAN gateway models vary (RPI / RAK / Kona, ...), so detection is keyed
+        # off the sensor name "lorawan gateway" rather than hardware.hardware.
+        # TODO Decide on an actual hardware check. For now, this applies the label
         # if it's in the manifest without any further checks.
         return True
 
@@ -161,6 +163,9 @@ def main():
         # check if the hardware exists
         hwDetector = HardwareDetector(root=args.root)
         for sensor in node_sensors:
+            # LoRaWAN is matched by sensor name below; hardware.hardware varies by lorwan gateway model.
+            if (sensor.get("name") or "").strip().lower() == "lorawan gateway":
+                continue
             sensor_hw = sensor["hardware"]["hardware"]
             logging.info("checking manifest listed sensor: %s", sensor_hw)
             resource_check_func = getattr(
@@ -176,6 +181,14 @@ def main():
 
             if resource_check_func():
                 resources[sensor_hw] = "true"
+
+        if any(
+            (s.get("name") or "").strip().lower() == "lorawan gateway"
+            for s in node_sensors
+        ):
+            logging.info("checking manifest listed sensor: lorawan gateway")
+            if hwDetector.resource_check_lorawan_gateway():
+                resources["lorawan"] = "true"
 
         # NOTE(sean) For the upcoming udev based device names, I'm am just check what's on node and not
         # cross checking the manifest. I think this is a bit simpler and we will likely have the right

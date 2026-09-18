@@ -141,7 +141,9 @@ class TestService(unittest.TestCase):
                     oneshot=True,
                 )
                 main()
-        self.assertIn("INFO:root:applying resources: arm64, bme680, poe", logs.output)
+        self.assertIn(
+            "INFO:root:applying resources: arm64, bme680, lorawan, poe", logs.output
+        )
         self.assertIn("INFO:root:applying zone: enclosure", logs.output)
 
     def testBladeCore(self, mock_k_lic, mock_k_lkc, mock_k_core, mock_subprocess):
