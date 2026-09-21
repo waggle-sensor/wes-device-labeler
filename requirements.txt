@@ -1,2 +1,2 @@
 kubernetes==25.3.0
-coverage==6.5.0
+coverage==7.6.1
